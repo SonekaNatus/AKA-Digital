@@ -1,10 +1,10 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, Instagram, MessageCircle } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, Instagram } from 'lucide-react';
 import Button from '../common/Button.jsx';
 import ErrorBoundary from '../common/ErrorBoundary.jsx';
 import Reveal from '../common/Reveal.jsx';
-import { getWhatsAppLink, siteConfig } from '../../config/site.js';
+import { siteConfig } from '../../config/site.js';
 
 const LaptopScene = lazy(() => import('../three/LaptopScene.jsx'));
 
@@ -181,16 +181,13 @@ export default function Hero() {
       </div>
 
       {/* Redes sociais */}
-      <div className="absolute bottom-6 left-5 z-30 flex gap-3 md:left-10">
-        {siteConfig.instagramUrl && (
+      {siteConfig.instagramUrl && (
+        <div className="absolute bottom-6 left-5 z-30 flex gap-3 md:left-10">
           <a href={siteConfig.instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram da AKA Digital" className={iconButton}>
             <Instagram size={18} />
           </a>
-        )}
-        <a href={getWhatsAppLink()} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp da AKA Digital" className={iconButton}>
-          <MessageCircle size={18} />
-        </a>
-      </div>
+        </div>
+      )}
 
       {/* Indicador de rolagem */}
       <a

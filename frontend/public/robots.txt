@@ -1,5 +1,2 @@
 User-agent: *
 Allow: /
-
-# Após publicar, adicione aqui a URL do sitemap, ex.:
-# Sitemap: https://seudominio.com.br/sitemap.xml

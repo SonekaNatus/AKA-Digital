@@ -31,8 +31,8 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
-        scrolled || open ? 'border-b border-white/10 bg-ink/90 backdrop-blur-md' : 'bg-ink/90 backdrop-blur-md'
+      className={`fixed inset-x-0 top-0 z-50 bg-ink/90 backdrop-blur-md transition-colors duration-300 ${
+        scrolled || open ? 'border-b border-white/10' : ''
       }`}
     >
       <nav aria-label="Navegação principal" className="container-x flex h-20 items-center justify-between gap-6">
@@ -88,6 +88,7 @@ export default function Header() {
                 <li key={item.to}>
                   <Link
                     to={item.to}
+                    onClick={() => setOpen(false)}
                     className="block border-b border-white/10 py-4 text-sm uppercase tracking-[0.18em] text-white/80 hover:text-accent"
                   >
                     {item.label}
@@ -97,6 +98,7 @@ export default function Header() {
               <li className="pt-5">
                 <Link
                   to="/#contato"
+                  onClick={() => setOpen(false)}
                   className="block rounded-full bg-accent px-5 py-3.5 text-center text-xs font-bold uppercase tracking-wider text-ink"
                 >
                   Solicitar orçamento
