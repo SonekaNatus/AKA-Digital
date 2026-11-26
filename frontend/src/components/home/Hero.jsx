@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, Instagram, MessageCircle } from 'lucide-react';
 import Button from '../common/Button.jsx';
@@ -22,7 +22,22 @@ const fallback = (
   <div className="absolute left-1/2 top-1/2 h-[48%] w-[48%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/25 blur-3xl" />
 );
 
+// No desktop (lg) o notebook e o título ficam sobrepostos (parallax). No celular tudo empilha.
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    const onChange = (event) => setIsDesktop(event.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return isDesktop;
+}
+
 export default function Hero() {
+  const isDesktop = useIsDesktop();
   const ref = useRef(null);
   const screenRef = useRef(null);
   const [laptopOpen, setLaptopOpen] = useState(false);
@@ -51,11 +66,11 @@ export default function Hero() {
   const sceneY = useTransform(scrollYProgress, [0, 1], [0, -70]);
 
   return (
-    <section id="inicio" ref={ref} className="relative flex min-h-[100svh] flex-col overflow-hidden bg-ink pt-20">
+    <section id="inicio" ref={ref} className="relative flex min-h-[100svh] flex-col overflow-hidden bg-ink pt-24 lg:pt-20">
       {/* Tipografia gigante ao fundo, com parallax suave */}
-      <div className="pointer-events-none absolute inset-x-0 top-[38%] z-0 -translate-y-1/2">
+      <div className="pointer-events-none relative z-0 px-4 lg:absolute lg:inset-x-0 lg:top-[38%] lg:-translate-y-1/2 lg:px-0">
         <motion.h1
-          style={{ y: titleY, fontSize: 'clamp(2.2rem, 13.5vw, 14rem)' }}
+          style={{ y: isDesktop ? titleY : 0, fontSize: 'clamp(2rem, 12vw, 14rem)' }}
           className="select-none whitespace-nowrap text-center font-display font-black leading-[0.8] tracking-[-0.05em] text-white"
         >
           {TITLE.split('').map((char, index) => (
@@ -73,7 +88,10 @@ export default function Hero() {
       </div>
 
       {/* Notebook 3D e, por cima dele, o site ao vivo na tela */}
-      <motion.div style={{ y: sceneY }} className="absolute inset-x-0 top-[10%] z-10 h-[64%] lg:top-[8%] lg:h-[72%]">
+      <motion.div
+        style={{ y: isDesktop ? sceneY : 0 }}
+        className="relative z-10 mt-2 h-[34svh] min-h-[240px] w-full lg:absolute lg:inset-x-0 lg:top-[8%] lg:mt-0 lg:h-[72%]"
+      >
         {!isEmbed && (
           <ErrorBoundary fallback={fallback}>
             <Suspense fallback={fallback}>
@@ -130,9 +148,9 @@ export default function Hero() {
       </button>
 
       {/* Conteúdo textual: só os blocos são clicáveis, o resto deixa o clique passar para o notebook */}
-      <div className="container-x pointer-events-none relative z-20 flex flex-1 flex-col justify-end gap-10 pb-28 pt-[62vh] lg:grid lg:grid-cols-2 lg:items-end lg:pt-0">
+      <div className="container-x pointer-events-none relative z-20 flex flex-1 flex-col justify-end gap-8 pb-28 pt-6 lg:grid lg:grid-cols-2 lg:items-end lg:gap-10 lg:pt-0">
         <Reveal delay={0.2} className="pointer-events-auto">
-          <div className="max-w-sm">
+          <div className="max-w-md lg:max-w-sm">
             <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">We create digital experiences.</p>
             <h2 className="mt-4 font-display text-2xl font-bold leading-tight text-white md:text-3xl">
               Sua empresa merece uma presença digital que gera resultados.
@@ -147,7 +165,7 @@ export default function Hero() {
         </Reveal>
 
         <Reveal delay={0.35} className="pointer-events-auto lg:justify-self-end">
-          <div className="w-full max-w-[300px] rounded-[2rem] bg-white p-6 text-ink shadow-2xl">
+          <div className="w-full rounded-[2rem] sm:max-w-[300px] bg-white p-6 text-ink shadow-2xl">
             <span className="grid h-12 w-12 place-items-center rounded-full bg-accent text-white">
               <ArrowUpRight size={20} aria-hidden="true" />
             </span>
