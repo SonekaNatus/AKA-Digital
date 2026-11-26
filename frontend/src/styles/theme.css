@@ -1,0 +1,31 @@
+/*
+ * TEMA DO SITE
+ * ------------------------------------------------------------
+ * Este é o único arquivo onde as cores do site são definidas.
+ * Troque os valores abaixo e salve: todo o site, inclusive o monitor 3D,
+ * passa a usar as novas cores.
+ *
+ * Os valores são RGB (vermelho verde azul), separados por espaço.
+ * Exemplo: #8B5CF6 = 139 92 246
+ */
+:root {
+  /* Fundo principal do site */
+  --color-bg: 9 11 18;            /* #090B12 */
+
+  /* Cor principal: títulos em destaque, botões, ícones e o monitor */
+  --color-primary: 139 92 246;    /* #8B5CF6 */
+
+  /* Cor secundária: botão do card de contato, base do monitor e destaques pontuais */
+  --color-secondary: 37 99 235;   /* #2563EB */
+
+  /* Textos sobre o fundo escuro */
+  --color-text: 255 255 255;      /* #FFFFFF */
+  --color-muted: 161 161 170;     /* #A1A1AA (textos de apoio) */
+
+  /* Texto sobre a cor principal e sobre cards claros */
+  --color-on-primary: 255 255 255;
+  --color-on-surface: 9 11 18;
+
+  /* Superfície clara (card "Ready to grow?") */
+  --color-surface: 255 255 255;
+}

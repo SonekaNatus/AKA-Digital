@@ -32,7 +32,7 @@ export default function Header() {
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-colors duration-300 ${
-        scrolled || open ? 'border-b border-white/10 bg-black/90 backdrop-blur-md' : 'bg-transparent'
+        scrolled || open ? 'border-b border-white/10 bg-ink/90 backdrop-blur-md' : 'bg-ink/90 backdrop-blur-md'
       }`}
     >
       <nav aria-label="Navegação principal" className="container-x flex h-20 items-center justify-between gap-6">
@@ -56,7 +56,7 @@ export default function Header() {
           className="hidden items-center gap-2 rounded-full bg-accent py-2.5 pl-5 pr-2.5 text-xs font-bold uppercase tracking-wider text-ink shadow-glow transition hover:brightness-95 xl:inline-flex"
         >
           Orçamento
-          <span className="grid h-7 w-7 place-items-center rounded-full bg-black text-accent">
+          <span className="grid h-7 w-7 place-items-center rounded-full bg-ink text-accent">
             <ArrowUpRight size={14} aria-hidden="true" />
           </span>
         </Link>

@@ -1,21 +1,24 @@
+/*
+ * Repositório de leads.
+ *
+ * Implementação atual: arquivo JSON local (backend/data/leads.json),
+ * adequada para desenvolvimento e volumes pequenos.
+ *
+ * Para produção, substitua as funções deste arquivo por um cliente de banco
+ * de dados (PostgreSQL, MySQL, MongoDB, etc.), mantendo as mesmas assinaturas
+ * (save / readAll). O restante da aplicação não precisa ser alterado.
+ */
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-/*
- * No Vercel o sistema de arquivos é somente leitura (exceto /tmp, que é apagado).
- * Nesse ambiente os pedidos não são gravados em arquivo e chegam pelo e-mail.
- * Para armazenamento permanente, conecte um banco de dados neste arquivo.
- */
-const IS_SERVERLESS = Boolean(process.env.VERCEL);
-
 const DATA_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../data');
 const DATA_FILE = path.join(DATA_DIR, 'leads.json');
 
+// Fila simples para evitar escritas concorrentes no mesmo arquivo.
 let queue = Promise.resolve();
 
 async function readAll() {
-  if (IS_SERVERLESS) return [];
   try {
     const raw = await fs.readFile(DATA_FILE, 'utf8');
     return JSON.parse(raw);
@@ -26,11 +29,6 @@ async function readAll() {
 }
 
 async function save(lead) {
-  if (IS_SERVERLESS) {
-    console.warn(`Pedido ${lead.id} não foi gravado em arquivo (ambiente Vercel). Verifique o e-mail.`);
-    return lead;
-  }
-
   const run = queue.then(async () => {
     await fs.mkdir(DATA_DIR, { recursive: true });
     const leads = await readAll();

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useRef } from 'react';
+import { lazy, Suspense, useCallback, useRef, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, Instagram, MessageCircle } from 'lucide-react';
 import Button from '../common/Button.jsx';
@@ -6,27 +6,53 @@ import ErrorBoundary from '../common/ErrorBoundary.jsx';
 import Reveal from '../common/Reveal.jsx';
 import { getWhatsAppLink, siteConfig } from '../../config/site.js';
 
-// Carregamento sob demanda: a cena 3D não bloqueia a primeira pintura da página.
-const MonitorScene = lazy(() => import('../three/MonitorScene.jsx'));
+const LaptopScene = lazy(() => import('../three/LaptopScene.jsx'));
 
 const TITLE = 'AKA DIGITAL';
+// Dentro da tela do notebook a página é carregada com ?embed=1 e não repete o notebook.
+const isEmbed = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('embed');
+// Tamanho de referência da página dentro da tela. A camada é reduzida para caber na tela 3D.
+const SITE_PX_W = 1280;
+const SITE_PX_H = 818;
 
 const iconButton =
   'grid h-11 w-11 place-items-center rounded-full border border-white/20 text-white transition hover:border-accent hover:text-accent';
 
+const fallback = (
+  <div className="absolute left-1/2 top-1/2 h-[48%] w-[48%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/25 blur-3xl" />
+);
+
 export default function Hero() {
   const ref = useRef(null);
+  const screenRef = useRef(null);
+  const [laptopOpen, setLaptopOpen] = useState(false);
+  const toggleLaptop = useCallback(() => setLaptopOpen((value) => !value), []);
+
+  // Recebe, a cada quadro, a posição da tela 3D e posiciona o site ao vivo sobre ela
+  const handleScreen = useCallback(({ visible, rect }) => {
+    const el = screenRef.current;
+    if (!el) return;
+
+    el.style.opacity = visible ? '1' : '0';
+    el.style.pointerEvents = visible ? 'auto' : 'none';
+    if (!visible) return;
+
+    el.style.left = `${rect.left}px`;
+    el.style.top = `${rect.top}px`;
+    el.style.width = `${rect.width}px`;
+    el.style.height = `${rect.height}px`;
+
+    const iframe = el.firstChild;
+    if (iframe) iframe.style.transform = `scale(${rect.width / SITE_PX_W})`;
+  }, []);
+
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
   const titleY = useTransform(scrollYProgress, [0, 1], [0, -160]);
   const sceneY = useTransform(scrollYProgress, [0, 1], [0, -70]);
 
   return (
-    <section
-      id="inicio"
-      ref={ref}
-      className="relative flex min-h-[100svh] flex-col overflow-hidden bg-black pt-20"
-    >
-      {/* Tipografia gigante ao fundo (parallax suave) */}
+    <section id="inicio" ref={ref} className="relative flex min-h-[100svh] flex-col overflow-hidden bg-ink pt-20">
+      {/* Tipografia gigante ao fundo, com parallax suave */}
       <div className="pointer-events-none absolute inset-x-0 top-[38%] z-0 -translate-y-1/2">
         <motion.h1
           style={{ y: titleY, fontSize: 'clamp(2.2rem, 13.5vw, 14rem)' }}
@@ -46,25 +72,44 @@ export default function Hero() {
         </motion.h1>
       </div>
 
-      {/* Objeto 3D sobreposto ao título */}
-      <motion.div
-        style={{ y: sceneY }}
-        className="absolute inset-x-0 top-[10%] z-10 h-[64%] lg:top-[8%] lg:h-[72%]"
-      >
-        <ErrorBoundary
-          fallback={<div className="absolute left-1/2 top-1/2 h-[48%] w-[48%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/25 blur-3xl" />}
-        >
-          <Suspense
-            fallback={<div className="absolute left-1/2 top-1/2 h-[48%] w-[48%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/20 blur-3xl" />}
-          >
-            <MonitorScene />
-          </Suspense>
-        </ErrorBoundary>
-      </motion.div>
+      {/* Notebook 3D e, por cima dele, o site ao vivo na tela */}
+      <motion.div style={{ y: sceneY }} className="absolute inset-x-0 top-[10%] z-10 h-[64%] lg:top-[8%] lg:h-[72%]">
+        {!isEmbed && (
+          <ErrorBoundary fallback={fallback}>
+            <Suspense fallback={fallback}>
+              <LaptopScene open={laptopOpen} onToggle={toggleLaptop} onScreenRect={handleScreen} />
+            </Suspense>
+          </ErrorBoundary>
+        )}
 
-      {/* Indicador decorativo de interação */}
-      <span aria-hidden="true" className="absolute right-[22%] top-[26%] z-20 hidden h-2.5 w-2.5 animate-pulse rounded-full bg-accent shadow-glow lg:block" />
-      <span aria-hidden="true" className="absolute left-[24%] bottom-[30%] z-20 hidden h-2 w-2 rounded-full bg-accent/70 lg:block" />
+        {!isEmbed && (
+          <div
+            ref={screenRef}
+            className="pointer-events-none absolute z-[11] overflow-hidden rounded-md bg-ink opacity-0 transition-opacity duration-500"
+            style={{ left: 0, top: 0, width: 0, height: 0 }}
+          >
+            {laptopOpen && (
+              <iframe
+                title="Site AKA Digital em tempo real"
+                src={`${window.location.origin}/?embed=1`}
+                loading="lazy"
+                className="block border-0"
+                style={{ width: SITE_PX_W, height: SITE_PX_H, transformOrigin: '0 0' }}
+              />
+            )}
+          </div>
+        )}
+
+        {!isEmbed && laptopOpen && (
+          <button
+            type="button"
+            onClick={toggleLaptop}
+            className="absolute right-2 top-2 z-[12] rounded-full border border-white/20 bg-ink/80 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white transition hover:border-accent"
+          >
+            Fechar notebook
+          </button>
+        )}
+      </motion.div>
 
       {/* Setas laterais: navegação entre as seções */}
       <button
@@ -84,13 +129,11 @@ export default function Hero() {
         <ChevronRight size={20} />
       </button>
 
-      {/* Conteúdo textual */}
-      <div className="container-x relative z-20 flex flex-1 flex-col justify-end gap-10 pb-28 pt-[62vh] lg:grid lg:grid-cols-2 lg:items-end lg:pt-0">
-        <Reveal delay={0.2}>
+      {/* Conteúdo textual: só os blocos são clicáveis, o resto deixa o clique passar para o notebook */}
+      <div className="container-x pointer-events-none relative z-20 flex flex-1 flex-col justify-end gap-10 pb-28 pt-[62vh] lg:grid lg:grid-cols-2 lg:items-end lg:pt-0">
+        <Reveal delay={0.2} className="pointer-events-auto">
           <div className="max-w-sm">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">
-              We create digital experiences.
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-accent">We create digital experiences.</p>
             <h2 className="mt-4 font-display text-2xl font-bold leading-tight text-white md:text-3xl">
               Sua empresa merece uma presença digital que gera resultados.
             </h2>
@@ -103,16 +146,16 @@ export default function Hero() {
           </div>
         </Reveal>
 
-        <Reveal delay={0.35} className="lg:justify-self-end">
-          <div className="w-full max-w-[300px] rounded-[2rem] bg-white p-6 text-black shadow-2xl">
-            <span className="grid h-12 w-12 place-items-center rounded-full bg-accent text-black">
+        <Reveal delay={0.35} className="pointer-events-auto lg:justify-self-end">
+          <div className="w-full max-w-[300px] rounded-[2rem] bg-white p-6 text-ink shadow-2xl">
+            <span className="grid h-12 w-12 place-items-center rounded-full bg-accent text-white">
               <ArrowUpRight size={20} aria-hidden="true" />
             </span>
             <h3 className="mt-6 font-display text-2xl font-black uppercase leading-none">Ready to grow?</h3>
             <p className="mt-3 text-sm leading-relaxed text-zinc-600">
               Seu próximo projeto digital começa com uma boa ideia. Vamos tirar a sua do papel?
             </p>
-            <Button to="/#contato" className="mt-6 w-full text-xs uppercase tracking-wider">
+            <Button to="/#contato" variant="secondary" className="mt-6 w-full text-xs uppercase tracking-wider">
               Fale com a AKA
             </Button>
           </div>
@@ -135,7 +178,7 @@ export default function Hero() {
       <a
         href="#servicos"
         aria-label="Rolar para os serviços"
-        className="absolute bottom-6 left-1/2 z-30 grid h-12 w-12 -translate-x-1/2 animate-bounce place-items-center rounded-full bg-accent text-black transition hover:scale-105"
+        className="absolute bottom-6 left-1/2 z-30 grid h-12 w-12 -translate-x-1/2 animate-bounce place-items-center rounded-full bg-accent text-white transition hover:scale-105"
       >
         <ChevronDown size={20} />
       </a>

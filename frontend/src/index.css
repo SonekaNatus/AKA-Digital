@@ -1,3 +1,5 @@
+@import './styles/theme.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,11 +7,11 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    background-color: #000000;
+    background-color: rgb(var(--color-bg));
   }
 
   body {
-    @apply bg-black font-sans text-white antialiased;
+    @apply bg-ink font-sans text-white antialiased;
   }
 
   section[id] {
@@ -17,8 +19,8 @@
   }
 
   ::selection {
-    background-color: #cbf615;
-    color: #000000;
+    background-color: rgb(var(--color-primary));
+    color: rgb(var(--color-on-primary));
   }
 }
 
@@ -32,7 +34,7 @@
   }
 
   .glass {
-    @apply border border-white/15 bg-black;
+    @apply border border-white/15 bg-ink;
   }
 
   .text-gradient {

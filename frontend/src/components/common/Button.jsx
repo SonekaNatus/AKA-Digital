@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 
 const variants = {
-  primary: 'bg-accent font-semibold text-ink shadow-glow hover:brightness-95',
+  primary: 'bg-accent font-semibold text-on-primary shadow-glow hover:brightness-110',
+  secondary: 'bg-neon font-semibold text-on-primary shadow-secondary hover:brightness-110',
   outline: 'border border-white/20 text-white hover:border-accent/60 hover:bg-white/5',
   ghost: 'text-zinc-300 hover:text-white',
 };

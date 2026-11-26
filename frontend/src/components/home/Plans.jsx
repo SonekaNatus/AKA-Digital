@@ -24,7 +24,7 @@ export default function Plans() {
               <article
                 className={`relative flex h-full flex-col rounded-3xl p-8 ${
                   plan.highlight
-                    ? 'border border-electric/60 bg-black shadow-glow'
+                    ? 'border border-electric/60 bg-ink shadow-glow'
                     : 'glass'
                 }`}
               >

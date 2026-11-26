@@ -8,10 +8,10 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-white/10 bg-black">
+    <footer className="border-t border-white/10 bg-ink">
       <div className="container-x grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-4">
         <div>
-          <Logo />
+          <Logo variant="completa" />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-zinc-400">
             Criamos sites profissionais, estratégias de tráfego pago e manutenção mensal para empresas que querem crescer no digital.
           </p>
